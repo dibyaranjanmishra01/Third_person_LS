@@ -1,34 +1,38 @@
 #include "app/AppState.h"
 #include "graphics/Mesh.h"
 #include "graphics/PrimitiveMeshes.h"
+#include "input/InputState.h"
+
+#include <SDL3/SDL.h>
+
 
 #include <array>
 
+namespace{
+    float getDeltaTime(Uint64& previousTime)
+    {
+        const Uint64 currentTime = SDL_GetTicks();
+        const float deltaTime = (currentTime - previousTime) / 1000.0f;
+        previousTime = currentTime;
+        return std::min(deltaTime, 0.1f);
+    }
+}
+
 namespace appstate{
 
-    AppState::AppState()
+    AppState::AppState() :
+    _playerController{_cube}
     {
         _cube = GameObject{
             .transform = Transform {
-                .position = { 0.0f, 1.0f, 5.0f },
-                .rotationDegrees = { 20.0f, 35.0f, 0.0f },
+                .position = { 0.0f, 1.0f, 0.0f },
+                .rotationDegrees = { 0.0f, 0.0f, 0.0f },
                 .scale = { 1.0f, 1.0f, 1.0f }
             }
         };
 
         _cube.mesh = primitives::CreateCube(2.0f);
-        _cube.color = { 1.0f, 0.0f, 0.0f, 1.0f };
-
-        _cube2 = GameObject{
-            .transform = Transform {
-                .position = { 0.7f, 1.0f, 3.0f },
-                .rotationDegrees = { 20.0f, 35.0f, 0.0f },
-                .scale = { 1.0f, 1.0f, 1.0f }
-            }
-        };
-
-        _cube2.mesh = primitives::CreateCube(2.0f);
-        _cube2.color = { 1.0f, 1.0f, 0.0f, 1.0f };
+        _cube.color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         _ground = GameObject{
             .transform = Transform {
@@ -39,13 +43,14 @@ namespace appstate{
         };
         _ground.mesh = primitives::CreatePlane(30.0f, 30.0f);
         _ground.color = { 0.15f, 0.55f, 0.20f, 1.0f };
+
+        previousTime = SDL_GetTicks();
     }
 
     AppState::~AppState()
     {
         _renderer.reset();
         _cube.mesh.reset();
-        _cube2.mesh.reset();
         _ground.mesh.reset();
         SDL_ReleaseWindowFromGPUDevice(_device, _window);
         SDL_DestroyGPUDevice(_device);
@@ -72,6 +77,7 @@ namespace appstate{
             SDL_Log("Couldn't claim window for GPU device: %s", SDL_GetError());
             return false;
         }
+        _keyboard = SDL_GetKeyboardState(nullptr);
         _renderer = std::make_unique<renderer::Renderer>(_device, _window);
         _camera = camera::Camera();
         _camera.position = { 6.0f, 5.0f, -6.0f };
@@ -79,21 +85,29 @@ namespace appstate{
 
         if (!_cube.mesh->Initialize(_device) ||
             !_ground.mesh->Initialize(_device) ||
-            !_renderer->Initialize() ||
-            !_cube2.mesh->Initialize(_device)) 
+            !_renderer->Initialize()) 
         {
             return false;
         }
         return true;
     }
 
-    bool AppState::render()
+    void AppState::addMouseInput(float xrel, float yrel)
     {
-        std::array<GameObject*, 3> objects{
+        _mouseDeltaX += xrel;
+        _mouseDeltaY += yrel;
+    }
+
+    bool AppState::loop()
+    {
+        std::array<GameObject*, 2> objects{
             &_cube,
-            &_cube2,
             &_ground,
         };
+
+        const float deltaTime = getDeltaTime(previousTime); 
+
+        _playerController.updatePlayer(input::InputState{_keyboard, _mouseDeltaX, _mouseDeltaY}, deltaTime);
 
         return _renderer->render(objects, _camera);
     }

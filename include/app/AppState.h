@@ -5,6 +5,7 @@
 
 #include "graphics/Renderer.h"
 #include "scene/Camera.h"
+#include "controller/PlayerController.h"
 
 // struct MyAppState
 // {
@@ -21,16 +22,21 @@ namespace appstate{
     class AppState {
         public :
             AppState();
-            bool render();
+            bool loop();
             bool Initialize();
+            void addMouseInput(float xrel, float yrel);
             ~AppState();
 
         private:
             SDL_Window* _window = nullptr;
             SDL_GPUDevice* _device = nullptr;
-            Uint64 previousTimeNs = 0;
+            Uint64 previousTime = 0;
             std::unique_ptr<renderer::Renderer> _renderer;
             camera::Camera _camera;
+            const bool* _keyboard;
+            controller::PlayerController _playerController;
+            float _mouseDeltaX = 0.0f;
+            float _mouseDeltaY = 0.0f;
 
             //-----------
             GameObject _cube;

@@ -23,6 +23,8 @@ add_executable(locomotion_system
     src/graphics/PrimitiveMeshes.cpp
     src/graphics/ShaderLoader.cpp
     src/app/AppState.cpp
+    src/input/InputState.cpp
+    src/controller/PlayerController.cpp
     src/main.cpp
 )
 

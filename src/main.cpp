@@ -10,6 +10,7 @@
 #include "graphics/ShaderLoader.h"
 #include "graphics/Vertex.h"
 #include "app/AppState.h"
+#include "input/InputState.h"
 
 // This function runs once at startup
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -31,9 +32,16 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 // This function runs when a new event (mouse input, keypresses, etc) occurs
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-	SDL_Log("Event");
+	// SDL_Log("Event");
+	appstate::AppState* myAppState = static_cast<appstate::AppState*>(appstate);
+
 	switch (event->type)
 	{
+	case SDL_EVENT_MOUSE_MOTION:
+        // inputState.mouseDeltaX += event.motion.xrel;
+        // inputState.mouseDeltaY += event.motion.yrel;
+		myAppState->addMouseInput(event->motion.xrel, event->motion.yrel);
+	break;
 	case SDL_EVENT_QUIT:
 		// Quit the application with a success state
 		return SDL_APP_SUCCESS;
@@ -50,7 +58,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Continue running the application
     appstate::AppState* myAppState = static_cast<appstate::AppState*>(appstate);
     
-    if(!myAppState->render())
+    if(!myAppState->loop())
     {
         return SDL_APP_FAILURE;
     }
