@@ -19,6 +19,10 @@ namespace input
             float getRight() const;
 
             bool getJump() const;
+
+            float getMouseDeltaX() const;
+
+            float getMouseDeltaY() const;
         private:
             float forward = 0.0f;
             float backward = 0.0f;
