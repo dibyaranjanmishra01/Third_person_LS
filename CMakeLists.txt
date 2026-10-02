@@ -25,6 +25,7 @@ add_executable(locomotion_system
     src/app/AppState.cpp
     src/input/InputState.cpp
     src/controller/PlayerController.cpp
+    src/scene/ThirdPersonCamera.cpp
     src/main.cpp
 )
 

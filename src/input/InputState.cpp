@@ -47,4 +47,14 @@ namespace input
     {
         return jump;
     }
+
+    float InputState::getMouseDeltaX() const
+    {
+        return mouseDeltaX;
+    }
+
+    float InputState::getMouseDeltaY() const
+    {
+        return mouseDeltaY;
+    }
 }
